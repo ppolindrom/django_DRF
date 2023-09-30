@@ -25,7 +25,7 @@ class LessonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PaymentsSerializer(serializers.ModelSerializer):
+class PaymentSerializer(serializers.ModelSerializer):
     """ Сериализотор для модели платежей """
 
     course = SlugRelatedField(slug_field='name', queryset=Course.objects.all())
@@ -37,7 +37,7 @@ class PaymentsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PaymentsForOwnerSerializer(serializers.ModelSerializer):
+class PaymentForOwnerSerializer(serializers.ModelSerializer):
     """ Сериализотор для модели платежей для использования его в выводе у пользователей """
 
     class Meta:
