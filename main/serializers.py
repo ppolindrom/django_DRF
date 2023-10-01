@@ -5,16 +5,23 @@ from main.models import Course, Lesson, Payment
 from users.models import User
 
 
+class LessonSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели уроков"""
+    class Meta:
+        model = Lesson
+        fields = '__all__'
+
+
 class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор для модели курсов"""
 
     # Выводим счетчик уроков
-    lessons_count = serializers.IntegerField(source='lesson_set.count', read_only=True)
-    lessons = serializers.SerializerMethodField()
+    lessons_count = serializers.SerializerMethodField()
+    lessons = LessonSerializer(many=True)
     owner = SlugRelatedField(slug_field='first_name', queryset=User.objects.all())
 
     def get_lessons_count(self, instance):
-        return instance.lesson.all().count()
+        return Lesson.objects.filter(course=instance).count()
 
     def get_lessons(self, course):
         return [el.name for el in Lesson.objects.filter(course=course)]
@@ -24,11 +31,7 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LessonSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели уроков"""
-    class Meta:
-        model = Lesson
-        fields = '__all__'
+
 
 
 class PaymentSerializer(serializers.ModelSerializer):
