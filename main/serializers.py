@@ -12,26 +12,32 @@ class LessonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class LessonListSerializer(serializers.ModelSerializer):
+    """ Сериализотор для модели урока для использования его в выводе в курсах """
+
+    class Meta:
+        model = Lesson
+        fields = ['id', 'name', 'description', 'preview', 'video_url']
+
+
 class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор для модели курсов"""
 
     # Выводим счетчик уроков
-    lessons_count = serializers.SerializerMethodField()
-    lessons = LessonSerializer(many=True)
+    lessons_count = serializers.IntegerField(source='lesson_set.count', read_only=True)
+    # Расширяем сериализатор дополнительным вложенным полем с уроками
+    lessons = serializers.SerializerMethodField()
+
+    # Выводим имя пользователя в поле "owner", вместо цифры
     owner = SlugRelatedField(slug_field='first_name', queryset=User.objects.all())
-
-    def get_lessons_count(self, instance):
-        return Lesson.objects.filter(course=instance).count()
-
-    def get_lessons(self, course):
-        return [el.name for el in Lesson.objects.filter(course=course)]
 
     class Meta:
         model = Course
         fields = '__all__'
 
-
-
+    # Получаем все поля для дополнительного поля уроков с фильтрацией по курсу
+    def get_lessons(self, course):
+        return LessonListSerializer(Lesson.objects.filter(course=course), many=True).data
 
 
 class PaymentSerializer(serializers.ModelSerializer):
