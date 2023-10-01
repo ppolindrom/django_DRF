@@ -13,6 +13,12 @@ class CourseSerializer(serializers.ModelSerializer):
     lessons = serializers.SerializerMethodField()
     owner = SlugRelatedField(slug_field='first_name', queryset=User.objects.all())
 
+    def get_lessons_count(self, instance):
+        return instance.lesson.all().count()
+
+    def get_lessons(self, course):
+        return [el.name for el in Lesson.objects.filter(course=course)]
+
     class Meta:
         model = Course
         fields = '__all__'
