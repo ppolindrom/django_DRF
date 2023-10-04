@@ -12,14 +12,6 @@ class LessonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LessonListSerializer(serializers.ModelSerializer):
-    """ Сериализотор для модели урока для использования его в выводе в курсах """
-
-    class Meta:
-        model = Lesson
-        fields = ['id', 'name', 'description', 'preview', 'video_url']
-
-
 class CourseSerializer(serializers.ModelSerializer):
     """Сериализатор для модели курсов"""
 
@@ -45,7 +37,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     course = SlugRelatedField(slug_field='name', queryset=Course.objects.all())
     lesson = SlugRelatedField(slug_field='name', queryset=Lesson.objects.all())
-    owner = SlugRelatedField(slug_field='first_name', queryset=User.objects.all())
+    owner = SlugRelatedField(slug_field='email', queryset=User.objects.all())
 
     class Meta:
         model = Payment
