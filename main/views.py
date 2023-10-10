@@ -3,10 +3,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+
+from main.paginators import EducationPaginator
 from main.permissions import IsModeratorOrReadOnly, IsCourseOrLessonOwner, IsPaymentOwner, IsCourseOwner
 
-from main.models import Course, Lesson, Payment
-from main.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
+from main.models import Course, Lesson, Payment, Subscription
+from main.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
 from users.models import UserRoles
 
 
@@ -14,6 +16,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """ViewSet для модели обучающего курса"""
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated, IsModeratorOrReadOnly | IsCourseOwner]
+    pagination_class = EducationPaginator
 
     def get_queryset(self):
         """Переопределяем queryset, чтобы доступ к обьекту имели только его владельцы и модератор"""
@@ -60,6 +63,7 @@ class LessonListAPIView(generics.ListAPIView):
     """Generic-класс для просмотра всех объектов Lesson"""
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, IsModeratorOrReadOnly | IsCourseOrLessonOwner]
+    pagination_class = EducationPaginator
 
     def get_queryset(self):
         """ Переопределяем queryset чтобы доступ к обьекту имели только его владельцы и модератор """
@@ -157,7 +161,8 @@ class PaymentRetrieveAPIView(generics.RetrieveAPIView):
         else:
             return Payment.objects.filter(owner=self.request.user)
 
-class PaymentsCreateAPIView(generics.CreateAPIView):
+
+class PaymentCreateAPIView(generics.CreateAPIView):
     """ Generic - класс для создания нового платежа """
 
     serializer_class = PaymentSerializer
@@ -172,3 +177,17 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
             new_payment = serializer.save()
             new_payment.owner = self.request.user
             new_payment.save()
+
+
+class SubscriptionViewSet(viewsets.ModelViewSet):
+    """ ViewSet - набор основных CRUD действий над подписками на курсы """
+
+    serializer_class = SubscriptionSerializer
+    queryset = Subscription.objects.all()
+    lookup_field = 'id'
+
+    def perform_create(self, serializer):
+        """ Переопределение метода создания подписки, чтобы сохранять текущий статус подписки True или False """
+
+        new_subscription = serializer.save(user=self.request.user)  # Сохраняем связь пользователя
+        new_subscription.save()
