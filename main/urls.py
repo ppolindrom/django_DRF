@@ -3,7 +3,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from main.views import CourseViewSet, LessonCreateAPIView, LessonListAPIView, LessonRetrieveAPIView, \
-    LessonUpdateAPIView, LessonDestroyAPIView, PaymentRetrieveAPIView, PaymentListAPIView, PaymentCreateAPIView
+    LessonUpdateAPIView, LessonDestroyAPIView, PaymentRetrieveAPIView, PaymentListAPIView, PaymentCreateAPIView, \
+    SubscriptionViewSet
 
 app_name = MainConfig.name
 
